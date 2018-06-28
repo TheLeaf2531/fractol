@@ -6,7 +6,7 @@
 /*   By: vboissel <vboissel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/25 16:25:02 by vboissel          #+#    #+#             */
-/*   Updated: 2018/06/26 18:08:09 by vboissel         ###   ########.fr       */
+/*   Updated: 2018/06/28 18:31:48 by vboissel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,9 @@
 # include "libft.h"
 # include "mlx.h"
 
-# define WIDTH 720
-# define HEIGHT 720
-# define ITER 230
+# define WIDTH 500
+# define HEIGHT 500
+# define ITER 160
 
 typedef union	u_color
 {

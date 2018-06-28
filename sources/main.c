@@ -6,7 +6,7 @@
 /*   By: vboissel <vboissel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/25 16:24:50 by vboissel          #+#    #+#             */
-/*   Updated: 2018/06/26 18:07:28 by vboissel         ###   ########.fr       */
+/*   Updated: 2018/06/28 18:24:40 by vboissel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,20 @@ void				fill_image(t_image *image, unsigned int color)
 		image->img[i] = color;
 		i++;
 	}
+}
+
+void		display_pos(t_env *e)
+{
+	char output[50];
+
+	snprintf(output, 50, "%Lf", e->f->x1);
+	mlx_string_put(e->mlx_ptr, e->win_ptr, 0, 0, to_color(255, 255, 255, 0), output);
+	snprintf(output, 50, "%Lf", e->f->x2);
+	mlx_string_put(e->mlx_ptr, e->win_ptr, 0, 20, to_color(255, 255, 255, 0), output);
+	snprintf(output, 50, "%Lf", e->f->y1);
+	mlx_string_put(e->mlx_ptr, e->win_ptr, 0, 40, to_color(255, 255, 255, 0), output);
+	snprintf(output, 50, "%Lf", e->f->y2);
+	mlx_string_put(e->mlx_ptr, e->win_ptr, 0, 60, to_color(255, 255, 255, 0), output);
 }
 
 t_image			*create_image(t_env *e)
@@ -106,10 +120,10 @@ int			draw_fractal(t_env *e, t_fractal *f)
 	while (y < HEIGHT)
 	{
 		i = f->f(f, x, y);
-		if (i == 80)
+		if (i == ITER)
 			put_pixel (e->img, to_color(0, 0, 0, 0), x, y);
 		else
-			put_pixel (e->img, to_color(0, i * 255/80, i * 255/80, 0), x, y);			
+			put_pixel (e->img, to_color(0, i * 255/ITER, i * 255/ITER, 0), x, y);			
 		y = x == WIDTH ? y + 1 : y;
 		x = x == WIDTH ? 0 : x + 1; 
 	}
@@ -121,71 +135,83 @@ int			draw_fractal(t_env *e, t_fractal *f)
 
 int			key_hook(int keycode, void *param)
 {
-	t_env	*e;
+	t_env				*e;
+	long double			diff_x;
+	long double			diff_y;
 
-	//printf("keycode %d\n", keycode);
 	e = param;
+	diff_x = sqrtl(powl(e->f->x2 - e->f->x1, 2.0)) * 0.1;
+	diff_y = sqrtl(powl(e->f->y2 - e->f->y1, 2.0)) * 0.1;
 	if (keycode == 53)
 	{
-		//free_stuff
 		exit(0);
 	}
 	if (keycode == 124)
 	{
-		printf("x +\n");
-		e->f->x1 += 0.1;
-		e->f->x2 += 0.1;
+		e->f->x1 += diff_x;
+		e->f->x2 += diff_x;
 	}
 	if (keycode == 123)
 	{
-		e->f->x1 -= 0.1;
-		e->f->x2 -= 0.1;
+		e->f->x1 -= diff_x;
+		e->f->x2 -= diff_x;
 	}
 	if (keycode == 126)
 	{
-		e->f->y1 += 0.1;
-		e->f->y2 += 0.1;
-		// plus y
+		e->f->y1 -= diff_y;
+		e->f->y2 -= diff_y;
 	}
 	if (keycode == 125)
 	{
-		e->f->y1 -= 0.1;
-		e->f->y2 -= 0.1;
-		// minus y
+		e->f->y1 += diff_y;
+		e->f->y2 += diff_y;
 	}
-	//printf("Fractal : \n\n    x1 : %Lf\n    x2 : %Lf\n    y1 : %Lf\n    y1 : %Lf\n", e->f->x1, e->f->x2, e->f->y1, e->f->y2);
 	draw_fractal(e, e->f);
+	display_pos(e);
 	return (0);
 }
 
 int			mouse_hook(int button, int x, int y, void *param)
 {
-	t_env			*e;
-	long double const	p = 1.01;
+	t_env				*e;
+	long double			diff_x;
+	long double			diff_y;
 
 	e = param;
 	(void)button;
 	(void)x;
 	(void)y;
+	diff_x = sqrtl(powl(e->f->x2 - e->f->x1, 2.0));
+	diff_y = sqrtl(powl(e->f->y2 - e->f->y1, 2.0));
 	if (button == 4)
 	{
-		e->f->x1 /= p;
-		e->f->x2 /= p;
-		e->f->y1 /= p;
-		e->f->y2 /= p;
+		e->f->x1 += diff_x * 0.25;
+		e->f->x2 -= diff_x * 0.25;
+		e->f->y1 += diff_y * 0.25;
+		e->f->y2 -= diff_y * 0.25;
 		draw_fractal(e, e->f);
 	}
 	if (button == 5)
 	{
-		e->f->x1 *= p;
-		e->f->x2 *= p;
-		e->f->y1 *= p;
-		e->f->y2 *= p; 
+		e->f->x1 -= diff_x * 0.25;
+		e->f->x2 += diff_x * 0.25;
+		e->f->y1 -= diff_y * 0.25;
+		e->f->y2 += diff_y * 0.25;
 		draw_fractal(e, e->f);
 	}
+	display_pos(e);
 	return (0);
 }
 
+int		expose_hook(void *param)
+{
+	t_env *e;
+
+	e = param;
+	draw_fractal(e, e->f);
+	display_pos(e);
+	return (0);
+}
 
 
 t_env		*start_mlx()
@@ -207,13 +233,14 @@ t_fractal	*get_mandel(void)
 
 	if (!(mandel = ft_memalloc(sizeof(t_fractal))))
 		return (NULL);
-	mandel->x1 = -2.1;
-	mandel->x2 = 0.6;
-	mandel->y1 = -1.2;
-	mandel->y2 = 1.2;
+	mandel->x1 = -0.75;
+	mandel->x2 = 0.5;
+	mandel->y1 = 0.0;
+	mandel->y2 = 1.25;
 	mandel->f = &cp_mandelbrot;
 	return (mandel);
 }
+
 
 int			main(int argc, char **argv)
 {
@@ -231,6 +258,7 @@ int			main(int argc, char **argv)
 		return (0);
 	mlx_key_hook(e->win_ptr, &key_hook, e);
 	mlx_mouse_hook(e->win_ptr, &mouse_hook, e);
+	mlx_expose_hook(e->win_ptr, &expose_hook, e);
 	draw_fractal(e, e->f);
 	mlx_loop(e->mlx_ptr);
 	return (0);

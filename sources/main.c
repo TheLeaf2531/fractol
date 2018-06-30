@@ -6,7 +6,7 @@
 /*   By: vboissel <vboissel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/25 16:24:50 by vboissel          #+#    #+#             */
-/*   Updated: 2018/06/28 18:24:40 by vboissel         ###   ########.fr       */
+/*   Updated: 2018/06/30 20:58:33 by vboissel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,6 +81,28 @@ t_image			*create_image(t_env *e)
 	return (image);
 }
 
+int			cp_newton(struct s_fractal *f, int x, int y)
+{
+	t_complex	z;
+	t_complex	z_tmp;
+	int			i;
+
+	i = 0;
+	z.r = x / f->zoom_x + f->x1;
+	z.i = y / f->zoom_y + f->y1;
+	while (i < ITER)
+	{
+		z_tmp.r = z.r;
+		z_tmp.i = z.i;
+		z.r = z_tmp.r * z_tmp.r * z_tmp.r - z_tmp.i * z_tmp.i * z_tmp.i - 1;
+		z.i = 3 * z_tmp.r * z_tmp.i - 1;
+		if (z.r * z.r + z.i * z.i > 4)
+			return (i);
+		i++;
+	}
+	return (i);
+}
+
 int			cp_mandelbrot(struct s_fractal *f, int x, int y)
 {
 	long double c_r;
@@ -105,15 +127,36 @@ int			cp_mandelbrot(struct s_fractal *f, int x, int y)
 	return (i);
 }
 
+int			cp_julia(struct s_fractal *f, int x, int y)
+{
+	t_complex	z;
+	t_complex	z_tmp;
+	int			i;
+
+	i = 0;
+	z.r = x / f->zoom_x + f->x1;
+	z.i = y / f->zoom_y + f->y1;
+	while (i < ITER)
+	{
+		z_tmp.r = z.r;
+		z_tmp.i = z.i;
+		z.r = z_tmp.r * z_tmp.r - z_tmp.i * z_tmp.i + f->c.r;
+		z.i = 2 * z_tmp.r * z_tmp.i + f->c.i;
+		if (z.r * z.r + z.i * z.i > 4)
+			return (i);
+		i++;
+	}
+	return (i);
+}
+
 int			draw_fractal(t_env *e, t_fractal *f)
 {
 	int x;
 	int y;
 	int i;
 
-	//printf("Draw Fractal\n");
-	f->zoom_x = WIDTH / (f->x2 - f->x1);
-	f->zoom_y = HEIGHT / (f->y2 - f->y1);
+	f->zoom_x = (long double)WIDTH / (f->x2 - f->x1);
+	f->zoom_y = (long double)HEIGHT / (f->y2 - f->y1);
 	x = 0;
 	y = 0;
 	e->img = create_image(e);
@@ -123,7 +166,7 @@ int			draw_fractal(t_env *e, t_fractal *f)
 		if (i == ITER)
 			put_pixel (e->img, to_color(0, 0, 0, 0), x, y);
 		else
-			put_pixel (e->img, to_color(0, i * 255/ITER, i * 255/ITER, 0), x, y);			
+			put_pixel (e->img, to_color(i % 255, 0, i * 255/ITER, 0), x, y);			
 		y = x == WIDTH ? y + 1 : y;
 		x = x == WIDTH ? 0 : x + 1; 
 	}
@@ -178,25 +221,25 @@ int			mouse_hook(int button, int x, int y, void *param)
 	long double			diff_y;
 
 	e = param;
-	(void)button;
 	(void)x;
 	(void)y;
+	printf("button %d\n", button);
 	diff_x = sqrtl(powl(e->f->x2 - e->f->x1, 2.0));
 	diff_y = sqrtl(powl(e->f->y2 - e->f->y1, 2.0));
 	if (button == 4)
 	{
-		e->f->x1 += diff_x * 0.25;
-		e->f->x2 -= diff_x * 0.25;
-		e->f->y1 += diff_y * 0.25;
-		e->f->y2 -= diff_y * 0.25;
+		e->f->x1 += diff_x * (long double)0.25;
+		e->f->x2 -= diff_x * (long double)0.25;
+		e->f->y1 += diff_y * (long double)0.25;
+		e->f->y2 -= diff_y * (long double)0.25;
 		draw_fractal(e, e->f);
 	}
 	if (button == 5)
 	{
-		e->f->x1 -= diff_x * 0.25;
-		e->f->x2 += diff_x * 0.25;
-		e->f->y1 -= diff_y * 0.25;
-		e->f->y2 += diff_y * 0.25;
+		e->f->x1 -= diff_x * (long double)0.25;
+		e->f->x2 += diff_x * (long double)0.25;
+		e->f->y1 -= diff_y * (long double)0.25;
+		e->f->y2 += diff_y * (long double)0.25;
 		draw_fractal(e, e->f);
 	}
 	display_pos(e);
@@ -227,21 +270,50 @@ t_env		*start_mlx()
 	return (e);
 }
 
+t_fractal	*get_julia(void)
+{
+	t_fractal *f;
+
+	if (!(f = ft_memalloc(sizeof(t_fractal))))
+		return (NULL);
+	f->x1 = -2;
+	f->x2 = 2;
+	f->y1 = -2;
+	f->y2 = 2;
+	f->f = &cp_julia;
+	f->zoom = 0.8;
+	f->c.r = -0.7;
+	f->c.i = 0.27015;
+	return (f);
+}
+
 t_fractal	*get_mandel(void)
 {
 	t_fractal *mandel;
 
 	if (!(mandel = ft_memalloc(sizeof(t_fractal))))
 		return (NULL);
-	mandel->x1 = -0.75;
-	mandel->x2 = 0.5;
-	mandel->y1 = 0.0;
-	mandel->y2 = 1.25;
+	mandel->x1 = -2;
+	mandel->x2 = 2;
+	mandel->y1 = -2;
+	mandel->y2 = 2;
 	mandel->f = &cp_mandelbrot;
 	return (mandel);
 }
 
+t_fractal	*get_newton(void)
+{
+	t_fractal	*newton;
 
+	if (!(newton = ft_memalloc(sizeof(t_fractal))))
+		return (NULL);
+	newton->x1 = -2;
+	newton->x2 = 2;
+	newton->y1 = -2;
+	newton->y2 = 2;
+	newton->f = &cp_newton;
+	return (newton);
+}
 int			main(int argc, char **argv)
 {
 	t_env	*e;
@@ -254,7 +326,7 @@ int			main(int argc, char **argv)
 	}
 	if (!(e = start_mlx()))
 		return (0);
-	if (!(e->f = get_mandel()))
+	if (!(e->f = get_newton()))
 		return (0);
 	mlx_key_hook(e->win_ptr, &key_hook, e);
 	mlx_mouse_hook(e->win_ptr, &mouse_hook, e);

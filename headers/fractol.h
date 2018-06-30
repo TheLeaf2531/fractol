@@ -6,7 +6,7 @@
 /*   By: vboissel <vboissel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/25 16:25:02 by vboissel          #+#    #+#             */
-/*   Updated: 2018/06/28 18:31:48 by vboissel         ###   ########.fr       */
+/*   Updated: 2018/06/30 20:34:16 by vboissel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,8 @@
 # include "libft.h"
 # include "mlx.h"
 
-# define WIDTH 500
-# define HEIGHT 500
+# define WIDTH 720
+# define HEIGHT 720
 # define ITER 160
 
 typedef union	u_color
@@ -37,14 +37,22 @@ typedef struct	s_image
 	int				endian;
 }				t_image;
 
+typedef struct s_complex
+{
+	long double r;
+	long double i;
+}				t_complex;
+
 typedef struct	s_fractal
 {
 	long double	x1;
 	long double	x2;
 	long double	y1;
 	long double	y2;
+	t_complex	c;
 	long double	zoom_x;
 	long double zoom_y;
+	long double zoom;
 	int			(*f)(struct s_fractal *f, int x, int y);
 }				t_fractal;
 

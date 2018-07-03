@@ -6,7 +6,7 @@
 /*   By: vboissel <vboissel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/06/25 16:25:02 by vboissel          #+#    #+#             */
-/*   Updated: 2018/06/30 20:34:16 by vboissel         ###   ########.fr       */
+/*   Updated: 2018/07/03 16:11:32 by vboissel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,5 +63,29 @@ typedef struct	s_env
 	t_image		*img;
 	t_fractal	*f;
 }				t_env;
+
+
+t_fractal		*get_julia(void);
+int				cp_julia(struct s_fractal *f, int x, int y);
+
+t_fractal		*get_mandel(void);
+int				cp_mandelbrot(struct s_fractal *f, int x, int y);
+
+t_fractal		*get_newton(void);
+int				cp_newton(struct s_fractal *f, int x, int y);
+
+int				expose_hook(void *param);
+int				mouse_hook(int button, int x, int y, void *param);
+int				key_hook(int keycode, void *param);
+
+int				draw_fractal(t_env *e, t_fractal *f);
+t_image			*create_image(t_env *e);
+unsigned int	to_color(unsigned int r, unsigned int g,
+					unsigned int b, unsigned int a);
+void			put_pixel(t_image *image,
+					unsigned int color, int x, int y);
+
+
+void			display_pos(t_env *e);
 
 #endif

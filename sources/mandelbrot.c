@@ -6,7 +6,7 @@
 /*   By: vboissel <vboissel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/07/12 22:02:51 by vboissel          #+#    #+#             */
-/*   Updated: 2018/08/31 10:35:11 by vboissel         ###   ########.fr       */
+/*   Updated: 2018/09/18 15:43:34 by vboissel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,11 +23,9 @@ t_fractal	*get_mandel_properties(void)
 	fractal->end.x = 2;
 	fractal->end.y = fractal->strt.y + (fractal->end.x - fractal->strt.x)
 		* HEIGHT / WIDTH;
-	fractal->zoom = 1./256;
+	fractal->zoom = 1.0 / 256;
 	fractal->cp_point = &cp_mandelbrot;
-	fractal->iter =  10;
-	//printf("Mandelbrot info :\n   strt.x : %Lf\n   end.x : %Lf\n   strt.y : %Lf\n   end.y : %Lf\n   zoom : %Lf\n   iter: %d\n",
-	//fractal->strt.x, fractal->end.x, fractal->strt.y, fractal->end.y, fractal->zoom, fractal->iter);
+	fractal->iter = 10;
 	return (fractal);
 }
 

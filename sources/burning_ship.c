@@ -6,7 +6,7 @@
 /*   By: vboissel <vboissel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/09/02 20:59:26 by vboissel          #+#    #+#             */
-/*   Updated: 2018/09/02 21:12:05 by vboissel         ###   ########.fr       */
+/*   Updated: 2018/09/18 15:38:05 by vboissel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ t_fractal	*get_burning_properties(void)
 	fractal->end.x = 2;
 	fractal->end.y = fractal->strt.y + (fractal->end.x - fractal->strt.x)
 		* HEIGHT / WIDTH;
-	fractal->zoom = 1./256;
+	fractal->zoom = 1.0 / 256;
 	fractal->iter = 10;
 	fractal->cp_point = &cp_burning;
 	return (fractal);
@@ -43,7 +43,7 @@ int			cp_burning(struct s_fractal *f, t_complex c)
 		tmp = z.r;
 		z.r = fabsl(z.r * z.r - z.i * z.i + c.r);
 		z.i = fabsl(2 * z.i * tmp + c.i);
-        i = i + 1;
+		i = i + 1;
 	}
 	return (i);
 }

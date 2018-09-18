@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: vboissel <vboissel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2018/06/25 16:25:02 by vboissel          #+#    #+#             */
-/*   Updated: 2018/07/03 16:11:32 by vboissel         ###   ########.fr       */
+/*   Created: 2018/07/12 21:46:27 by vboissel          #+#    #+#             */
+/*   Updated: 2018/09/02 22:07:18 by vboissel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,29 +15,50 @@
 
 # include <math.h>
 # include <stdio.h>
+# include <pthread.h>
+
 # include "libft.h"
 # include "mlx.h"
 
-# define WIDTH 720
+# define WIDTH 1280
 # define HEIGHT 720
-# define ITER 160
 
-typedef union	u_color
+typedef struct s_hsvColor
 {
-	unsigned int	c;
-	unsigned char	rgba[4];
-}				t_color;
+	float	h;
+	float	s;
+	float	v;
+}				t_hsvColor;
 
-typedef struct	s_image
+typedef	struct	s_rgbColor
+{
+	int		r;
+	int		g;
+	int		b;
+}				t_rgbColor;
+
+typedef struct	s_mlx_img
 {
 	void			*img_ptr;
 	unsigned int	*img;
 	int				bpp;
 	int				size_line;
 	int				endian;
-}				t_image;
+}				t_mlx_img;
 
-typedef struct s_complex
+typedef struct	s_coordi
+{
+	int x;
+	int y;
+}				t_coordi;
+
+typedef struct	s_coordld
+{
+	long double x;
+	long double y;
+}				t_coordld;
+
+typedef struct	s_complex
 {
 	long double r;
 	long double i;
@@ -45,47 +66,65 @@ typedef struct s_complex
 
 typedef struct	s_fractal
 {
-	long double	x1;
-	long double	x2;
-	long double	y1;
-	long double	y2;
+	t_coordld	strt;
+	t_coordld	end;
+	long double	zoom;
 	t_complex	c;
-	long double	zoom_x;
-	long double zoom_y;
-	long double zoom;
-	int			(*f)(struct s_fractal *f, int x, int y);
+	int			iter;
+	int			(*cp_point)(struct s_fractal *f, t_complex c);
 }				t_fractal;
 
-typedef struct	s_env
+typedef struct	s_square
+{
+	t_coordi	strt;
+	t_coordi	end;
+	t_mlx_img	*img;
+}				t_square;
+
+typedef struct s_renderer
+{
+	t_fractal	*f;
+	t_square	**squares;
+	// TODO ADD MULTITHREADING LATER
+}				t_renderer;
+
+typedef struct s_env
 {
 	void		*mlx_ptr;
 	void		*win_ptr;
-	t_image		*img;
 	t_fractal	*f;
 }				t_env;
 
+typedef	struct	s_sqrdt
+{
+	t_square		*sqr;
+	t_fractal		*f;
+	pthread_mutex_t	mutex;
+}				t_sqrdt;
 
-t_fractal		*get_julia(void);
-int				cp_julia(struct s_fractal *f, int x, int y);
+void		put_pixel(t_mlx_img *image, unsigned int color, t_coordi p, t_coordi res);
+void		fill_image(t_mlx_img *image, unsigned int color, t_coordi res);
+t_square	*alloc_sqr(void *mlx_ptr, t_coordi strt, t_coordi end);
+int			render_sqr(t_square *sqr, t_fractal *f);
+void		*sqr_renderer(void *arg);
+t_square	**cr_squares(void *mlx_ptr);
+int			render_fractal(t_env *env, t_fractal *f);
 
-t_fractal		*get_mandel(void);
-int				cp_mandelbrot(struct s_fractal *f, int x, int y);
+int			cp_mandelbrot(struct s_fractal *f, t_complex c);
+t_fractal	*get_mandel_properties(void);
 
-t_fractal		*get_newton(void);
-int				cp_newton(struct s_fractal *f, int x, int y);
+int			cp_julia(struct s_fractal *f, t_complex c);
+t_fractal	*get_julia_properties(void);
 
-int				expose_hook(void *param);
-int				mouse_hook(int button, int x, int y, void *param);
-int				key_hook(int keycode, void *param);
+int			cp_burning(struct s_fractal *f, t_complex c);
+t_fractal	*get_burning_properties(void);
 
-int				draw_fractal(t_env *e, t_fractal *f);
-t_image			*create_image(t_env *e);
-unsigned int	to_color(unsigned int r, unsigned int g,
-					unsigned int b, unsigned int a);
-void			put_pixel(t_image *image,
-					unsigned int color, int x, int y);
+t_coordi				set_coordi(int x, int y);
+unsigned int			hsv_to_color(float h, float s, float v);
 
 
-void			display_pos(t_env *e);
+
+int			key_hook(int keycode, void *param);
+int			mouse_hook(int button, int x,int y, void *param);
 
 #endif

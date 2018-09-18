@@ -5,88 +5,73 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: vboissel <vboissel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2018/07/03 16:05:09 by vboissel          #+#    #+#             */
-/*   Updated: 2018/07/03 17:19:20 by vboissel         ###   ########.fr       */
+/*   Created: 2018/08/15 13:04:15 by vboissel          #+#    #+#             */
+/*   Updated: 2018/09/02 22:17:36 by vboissel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "fractol.h"
 
-int			key_hook(int keycode, void *param)
-{
-	t_env				*e;
-	long double			diff_x;
-	long double			diff_y;
 
-	e = param;
-	diff_x = sqrtl(powl(e->f->x2 - e->f->x1, 2.0)) * 0.1;
-	diff_y = sqrtl(powl(e->f->y2 - e->f->y1, 2.0)) * 0.1;
-	if (keycode == 53)
+
+
+
+int		key_hook(int keycode, void *param)
+{
+	t_env *env;
+	double	tmp;
+	
+	env = param;
+	if (keycode == 65453)
+		env->f->zoom *= 1.1;
+	else if (keycode == 65451)
+		env->f->zoom /= 1.1;
+	else if (keycode == 65362)
 	{
+		env->f->strt.y += (env->f->strt.y - env->f->end.y) * env->f->zoom * 10;
+		env->f->end.y = env->f->strt.y + (env->f->end.x - env->f->strt.x);
+	}
+	else if (keycode == 65364)
+	{
+		env->f->strt.y -= (env->f->strt.y - env->f->end.y) * env->f->zoom * 10;
+		env->f->end.y = env->f->strt.y + (env->f->end.x - env->f->strt.x);
+	}
+	else if (keycode == 65363)
+	{
+		tmp = (env->f->end.x - env->f->strt.x) * env->f->zoom * 10;
+		env->f->strt.x += tmp;
+		env->f->end.x += tmp;
+	}
+	else if (keycode == 65361)
+	{
+		tmp = (env->f->end.x - env->f->strt.x) * env->f->zoom * 10;
+		env->f->strt.x -= tmp;
+		env->f->end.x -= tmp;
+	}
+	else if (keycode == 65365)
+		env->f->iter += 1;
+	else if (keycode == 65366 && env->f->iter > 2)
+		env->f->iter -= 1;
+	else if (keycode == 65307)
 		exit(0);
-	}
-	if (keycode == 124)
-	{
-		e->f->x1 += diff_x;
-		e->f->x2 += diff_x;
-	}
-	if (keycode == 123)
-	{
-		e->f->x1 -= diff_x;
-		e->f->x2 -= diff_x;
-	}
-	if (keycode == 126)
-	{
-		e->f->y1 -= diff_y;
-		e->f->y2 -= diff_y;
-	}
-	if (keycode == 125)
-	{
-		e->f->y1 += diff_y;
-		e->f->y2 += diff_y;
-	}
-	draw_fractal(e, e->f);
-	display_pos(e);
+	render_fractal(env, env->f);
 	return (0);
 }
 
-int			mouse_hook(int button, int x, int y, void *param)
+int		mouse_hook(int button, int x,int y, void *param)
 {
-	t_env				*e;
-	long double			diff_x;
-	long double			diff_y;
+	t_complex c;
+	t_env *env;
 
-	e = param;
-	(void)x;
-	(void)y;
-	diff_x = sqrtl(powl(e->f->x2 - e->f->x1, 2.0));
-	diff_y = sqrtl(powl(e->f->y2 - e->f->y1, 2.0));
-	if (button == 4)
-	{
-		e->f->x1 += diff_x * (long double)0.25;
-		e->f->x2 -= diff_x * (long double)0.25;
-		e->f->y1 += diff_y * (long double)0.25;
-		e->f->y2 -= diff_y * (long double)0.25;
-		draw_fractal(e, e->f);
-	}
-	if (button == 5)
-	{
-		e->f->x1 -= diff_x * (long double)0.25;
-		e->f->x2 += diff_x * (long double)0.25;
-		e->f->y1 -= diff_y * (long double)0.25;
-		e->f->y2 += diff_y * (long double)0.25;
-		draw_fractal(e, e->f);
-	}
-	display_pos(e);
-	return (0);
-}
-
-int		expose_hook(void *param)
-{
-	t_env *e;
-
-	e = param;
-	draw_fractal(e, e->f);
-	display_pos(e);
+	env = param;
+	(void)button;
+	/*	
+		fractal->c.r = -0.7;
+		fractal->c.i = 0.27015;
+	*/
+	c.r = (x * 100 / WIDTH) - -0.7;
+	c.i = (y * 100 / HEIGHT) - 0.27015; 
+	env->f->c = c;
+	render_fractal(env, env->f);
 	return (0);
 }

@@ -1,54 +1,49 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   mandelbrot.c                                       :+:      :+:    :+:   */
+/*   burning_ship.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: vboissel <vboissel@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2018/07/12 22:02:51 by vboissel          #+#    #+#             */
-/*   Updated: 2018/08/31 10:35:11 by vboissel         ###   ########.fr       */
+/*   Created: 2018/09/02 20:59:26 by vboissel          #+#    #+#             */
+/*   Updated: 2018/09/02 21:12:05 by vboissel         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "fractol.h"
 
-t_fractal	*get_mandel_properties(void)
+t_fractal	*get_burning_properties(void)
 {
 	t_fractal *fractal;
 
 	if (!(fractal = ft_memalloc(sizeof(t_fractal))))
 		return (NULL);
-	fractal->strt.x = -0.3;
-	fractal->strt.y = 0.6;
+	fractal->strt.x = -2;
+	fractal->strt.y = -2;
 	fractal->end.x = 2;
 	fractal->end.y = fractal->strt.y + (fractal->end.x - fractal->strt.x)
 		* HEIGHT / WIDTH;
 	fractal->zoom = 1./256;
-	fractal->cp_point = &cp_mandelbrot;
-	fractal->iter =  10;
-	//printf("Mandelbrot info :\n   strt.x : %Lf\n   end.x : %Lf\n   strt.y : %Lf\n   end.y : %Lf\n   zoom : %Lf\n   iter: %d\n",
-	//fractal->strt.x, fractal->end.x, fractal->strt.y, fractal->end.y, fractal->zoom, fractal->iter);
+	fractal->iter = 10;
+	fractal->cp_point = &cp_burning;
 	return (fractal);
 }
 
-int			cp_mandelbrot(struct s_fractal *f, t_complex c)
+int			cp_burning(struct s_fractal *f, t_complex c)
 {
 	t_complex	z;
-	t_complex	z_2;
+	long double tmp;
 	int			i;
 
 	i = 0;
 	z.r = 0;
 	z.i = 0;
-	z_2.r = 0;
-	z_2.i = 0;
-	while (z_2.r + z_2.i < 4 && i < f->iter)
+	while (z.r * z.r + z.i * z.i < 4 && i < f->iter)
 	{
-		z.i = 2 * z.r * z.i + c.i;
-		z.r = z_2.r - z_2.i + c.r;
-		z_2.r = z.r * z.r;
-		z_2.i = z.i * z.i;
-		i += 1;
+		tmp = z.r;
+		z.r = fabsl(z.r * z.r - z.i * z.i + c.r);
+		z.i = fabsl(2 * z.i * tmp + c.i);
+        i = i + 1;
 	}
 	return (i);
 }
